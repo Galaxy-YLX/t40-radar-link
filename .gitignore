@@ -13,6 +13,9 @@ t40_cloud_view.log
 *.pcapng
 /tmp/
 
+# 本地工作数据
+.workbuddy/
+
 # 编辑器和系统
 .vscode/
 .idea/
