@@ -1,0 +1,4 @@
+# 上位机依赖（Python 3.9+）
+numpy>=1.21
+PySide6>=6.4
+pyqtgraph>=0.13

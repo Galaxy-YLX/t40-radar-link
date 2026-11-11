@@ -1,0 +1,22 @@
+[Unit]
+Description=T40 radar link (radar_wifi + t40_link APs, CAN bridge, TCP 46000 forwarder)
+Documentation=file:/root/start_all.sh
+# rc.local 会 insmod 厂商 fpgadrv，先让它跑完
+After=local-fs.target rc-local.service network.target
+Wants=network.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+# 脚本里起的 hostapd/dnsmasq/python 都是后台进程，服务停止时只杀主脚本，
+# 不要连带把 cgroup 里的子进程一起清掉（以前脚本 exit 1 时它们被一起杀了）
+KillMode=process
+# 脚本里等 USB 枚举 + 雷达关联的轮询，留足时间
+TimeoutStartSec=300
+ExecStart=/bin/sh /root/start_all.sh
+ExecStop=/bin/sh /root/start_all.sh --stop
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

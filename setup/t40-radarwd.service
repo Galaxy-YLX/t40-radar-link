@@ -1,0 +1,17 @@
+[Unit]
+Description=T40 radar link watchdog (soft-recover radar AP, reboot on wedge)
+Documentation=file:/root/radar_watchdog.sh
+After=local-fs.target t40-hwwdt.service
+Wants=t40-hwwdt.service
+
+[Service]
+Type=simple
+# 看门狗是长跑脚本；被误杀一次就等于整晚没人看着，所以让 systemd 兜住。
+# KillMode=process：它自己会 fork hostapd/pkill 子进程，别连坐。
+KillMode=process
+ExecStart=/bin/sh /root/radar_watchdog.sh
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
