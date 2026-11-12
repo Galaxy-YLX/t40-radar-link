@@ -16,6 +16,15 @@ t40_cloud_view.log
 # 本地工作数据
 .workbuddy/
 
+# Android（android/ 是标准 Gradle 工程，只提交源码和 gradle wrapper）
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+android/.idea/
+android/captures/
+*.hprof
+
 # 编辑器和系统
 .vscode/
 .idea/

@@ -1,7 +1,8 @@
 # T40 雷达数据链路
 
 DJI T40 植保机 **RD2484R** 雷达的完整数据链路实现：一块 XCZU3EG（FZ3B）板卡同时接雷达的 CAN
-总线和雷达自己的 WiFi，把控制与感知数据经以太网/WiFi 转发给电脑，由上位机实时显示点云并控制转速。
+总线和雷达自己的 WiFi，把控制与感知数据经以太网/WiFi 转发出去，由电脑（或安卓手机）的上位机
+实时显示点云并控制转速。
 
 雷达的 0x00F0 感知报文格式是**逆向**出来的——固件里没有文档，报文里没有自描述。
 完整的过程、证据和复现方法整理成了一个可复用的 skill：[`skills/t40-radar-reverse/`](skills/t40-radar-reverse/)。
@@ -26,6 +27,7 @@ host/t40_gui.py             上位机控制台（PySide6 + pyqtgraph：转速/CA
 host/radar_min.py           板卡侧最小雷达客户端（flight_pos 门控 + CAN 桥接）
 host/duml_v2.py             DUML v2 / 1E61 感知包解析
 host/cloud_view_live.bat    Windows 双击启动点云显示
+android/                    安卓端：原生 Kotlin 重写的点云显示（含预编译 APK）
 setup/start_all.sh          板卡上电一键恢复整套链路（AP + CAN + 桥接 + 看门狗）
 setup/radar_bringup.sh      雷达侧后台看护（等网卡 → 起 AP → 等关联 → 起 radar_min）
 setup/radar_usb_watch.sh    雷达网卡掉线后自动重新枚举 USB
@@ -180,6 +182,41 @@ python host/t40_cloud_view.py --selftest capture.pcap
 │            后 180°（走廊纵深）             │ 转速 1236 rpm   │
 └──────────────────────────────────────────┴─────────────────┘
 ```
+
+## 安卓端（手机看画面）
+
+`android/` 是把上面这套点云显示**用原生 Kotlin 重写**的安卓 App（不是把 PySide6 打包进手机：
+PySide6 没有官方 Android 轮子，Qt for Android 得自己交叉编译 Qt + PySide6 + pyqtgraph + numpy，
+实际走不通）。预编译包 `android/dist/t40radar-1.0.apk`（709 KB，debug 签名）可以直接装。
+
+用法：手机连板卡的 `t40_link`（WPA2，密码见 `setup/hostapd_t40link.conf`，发布包里是
+`CHANGEME_PASSWORD`），打开 App 点「连接」就连 `192.168.9.1:46000`；没有硬件时点「演示」，
+跑合成走廊数据看界面。
+
+对齐 PC 端的是：默认整幅逆时针 180° + 方位逆时针、121° 盲区楔形、16 级配色、c5 反推转速、
+量程/阈值/累积圈数、转速下发与马达开关（CMD 0x40 → CAN `0x1E80`/`0x1E09`/`0x1E0A`/`0x1E82`）、
+红黄绿状态条（判读顺序与 PC 的 `_watchdog` 一致）。
+
+和 PC 端**有意不同**的两点：点以「米」存而不是像素（改量程不用重投影、历史点不用清）；
+板卡日志只进「命令」那一行，不参与链路判读（日志里有「CAN 打开失败」这类字眼，按文本猜状态
+会把好链路打成未连接）。
+
+```
+android/app/src/main/java/com/t40/radar/
+  RadarDecoder.kt   0x00F0 解码 + 球坐标投影 + c5 反推转速（纯 Kotlin，无 Android 依赖）
+  T40Client.kt      T40R 协议（24 B 头 + CRC32）/ TCP 收发自愈 / CMD 下发 / DemoSource
+  PpiView.kt        自定义 View：网格、盲区楔形、历史点环形缓冲、当前帧分级配色
+  MainActivity.kt   连线、状态判读、面板
+```
+
+**解码已经对拍过**：`tools/make_testdata.py` 不重写解码，而是直接 import 本仓库的
+`host/t40_cloud_view.py` 算期望值，60 帧真实点云逐点比对（`cd android && ./gradlew testDebugUnitTest`，
+输出「对拍通过：60 帧 / 15418 点」）。**画图部分没有自动化验证**（需要对着一张真机截图看朝向/盲区）。
+
+构建：JDK 17 + Android SDK 34，工程零第三方依赖（不引 AndroidX，只有测试用 junit）。
+`cd android && ./gradlew assembleRelease`。
+
+一个坑：板卡桥接**同时只接一个客户端**，手机连着时电脑连不上（新连接会把旧的踢掉）。
 
 ## 关键参数
 

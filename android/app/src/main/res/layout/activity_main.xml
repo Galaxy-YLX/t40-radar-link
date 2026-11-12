@@ -1,0 +1,445 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  布局：上面是 PPI（weight 1），下面是固定按钮条 + 可折叠面板（weight 2，GONE 时不占位）。
+  这样竖屏横屏都不会把面板挤到屏幕外，面板内部自己滚动。
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#FF000000">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <com.t40.radar.PpiView
+            android:id="@+id/ppi"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <!-- banner 和 stats 上下排（不要用固定 marginTop：长文案会折行把它们压在一起） -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/banner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="#FF24303C"
+                android:padding="6dp"
+                android:textColor="#FFFFFFFF"
+                android:textSize="12sp"
+                android:text="未连接" />
+
+            <TextView
+                android:id="@+id/stats"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="6dp"
+                android:layout_marginTop="6dp"
+                android:background="#99000000"
+                android:padding="6dp"
+                android:fontFamily="monospace"
+                android:textColor="#FFC9D6E3"
+                android:textSize="10sp"
+                android:lineSpacingExtra="2dp"
+                android:text="" />
+        </LinearLayout>
+    </FrameLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="#FF0E141A">
+
+        <Button
+            android:id="@+id/btnConnect"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textSize="12sp"
+            android:text="连接" />
+
+        <Button
+            android:id="@+id/btnPanel"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textSize="12sp"
+            android:text="面板" />
+
+        <Button
+            android:id="@+id/btnPause"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textSize="12sp"
+            android:text="暂停" />
+
+        <Button
+            android:id="@+id/btnClear"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textSize="12sp"
+            android:text="清除" />
+
+        <Button
+            android:id="@+id/btnDemo"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textSize="12sp"
+            android:text="演示" />
+    </LinearLayout>
+
+    <ScrollView
+        android:id="@+id/scrollPanel"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="2"
+        android:visibility="gone"
+        android:background="#F20A0F14"
+        android:padding="8dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="板卡地址（手机先连上 t40_link 这个 WiFi）"
+                android:textColor="#FF8FA3B8"
+                android:textSize="11sp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <EditText
+                    android:id="@+id/etHost"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:inputType="text"
+                    android:singleLine="true"
+                    android:textSize="13sp"
+                    android:text="192.168.9.1" />
+
+                <EditText
+                    android:id="@+id/etPort"
+                    android:layout_width="72dp"
+                    android:layout_height="wrap_content"
+                    android:inputType="number"
+                    android:singleLine="true"
+                    android:textSize="13sp"
+                    android:text="46000" />
+
+                <Button
+                    android:id="@+id/btnWifi"
+                    style="?android:attr/buttonBarButtonStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="11sp"
+                    android:text="WiFi" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:textColor="#FF8FA3B8"
+                android:textSize="11sp"
+                android:text="显示" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:layout_width="48dp"
+                    android:layout_height="wrap_content"
+                    android:textColor="#FFE6EDF3"
+                    android:textSize="12sp"
+                    android:text="量程" />
+
+                <SeekBar
+                    android:id="@+id/sbRange"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1" />
+
+                <TextView
+                    android:id="@+id/tvRange"
+                    android:layout_width="56dp"
+                    android:layout_height="wrap_content"
+                    android:textColor="#FFE6EDF3"
+                    android:textSize="12sp"
+                    android:gravity="end"
+                    android:text="8 m" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:layout_width="48dp"
+                    android:layout_height="wrap_content"
+                    android:textColor="#FFE6EDF3"
+                    android:textSize="12sp"
+                    android:text="阈值" />
+
+                <SeekBar
+                    android:id="@+id/sbThr"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1" />
+
+                <TextView
+                    android:id="@+id/tvThr"
+                    android:layout_width="56dp"
+                    android:layout_height="wrap_content"
+                    android:textColor="#FFE6EDF3"
+                    android:textSize="12sp"
+                    android:gravity="end"
+                    android:text="80" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:layout_width="48dp"
+                    android:layout_height="wrap_content"
+                    android:textColor="#FFE6EDF3"
+                    android:textSize="12sp"
+                    android:text="累积" />
+
+                <SeekBar
+                    android:id="@+id/sbHist"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1" />
+
+                <TextView
+                    android:id="@+id/tvHist"
+                    android:layout_width="56dp"
+                    android:layout_height="wrap_content"
+                    android:textColor="#FFE6EDF3"
+                    android:textSize="12sp"
+                    android:gravity="end"
+                    android:text="30 圈" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:layout_width="48dp"
+                    android:layout_height="wrap_content"
+                    android:textColor="#FFE6EDF3"
+                    android:textSize="12sp"
+                    android:text="旋转" />
+
+                <SeekBar
+                    android:id="@+id/sbRot"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1" />
+
+                <TextView
+                    android:id="@+id/tvRot"
+                    android:layout_width="56dp"
+                    android:layout_height="wrap_content"
+                    android:textColor="#FFE6EDF3"
+                    android:textSize="12sp"
+                    android:gravity="end"
+                    android:text="180°" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <Switch
+                    android:id="@+id/swCcw"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textColor="#FFE6EDF3"
+                    android:textSize="12sp"
+                    android:checked="true"
+                    android:text="方位逆时针" />
+
+                <Switch
+                    android:id="@+id/swBlind"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textColor="#FFE6EDF3"
+                    android:textSize="12sp"
+                    android:checked="true"
+                    android:text="标盲区" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:textColor="#FF8FA3B8"
+                android:textSize="11sp"
+                android:text="雷达转速（走板卡 → CAN 0x1E80）" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <SeekBar
+                    android:id="@+id/sbRpm"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1" />
+
+                <TextView
+                    android:id="@+id/tvRpm"
+                    android:layout_width="76dp"
+                    android:layout_height="wrap_content"
+                    android:textColor="#FFE6EDF3"
+                    android:textSize="12sp"
+                    android:gravity="end"
+                    android:text="1200 rpm" />
+
+                <Button
+                    android:id="@+id/btnRpm"
+                    style="?android:attr/buttonBarButtonStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="12sp"
+                    android:text="应用" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btnP600"
+                    style="?android:attr/buttonBarButtonStyle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textSize="12sp"
+                    android:text="600" />
+
+                <Button
+                    android:id="@+id/btnP900"
+                    style="?android:attr/buttonBarButtonStyle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textSize="12sp"
+                    android:text="900" />
+
+                <Button
+                    android:id="@+id/btnP1200"
+                    style="?android:attr/buttonBarButtonStyle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textSize="12sp"
+                    android:text="1200" />
+
+                <Button
+                    android:id="@+id/btnP1500"
+                    style="?android:attr/buttonBarButtonStyle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textSize="12sp"
+                    android:text="1500" />
+
+                <Button
+                    android:id="@+id/btnP1800"
+                    style="?android:attr/buttonBarButtonStyle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textSize="12sp"
+                    android:text="1800" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btnMotorOn"
+                    style="?android:attr/buttonBarButtonStyle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textSize="12sp"
+                    android:text="马达 开" />
+
+                <Button
+                    android:id="@+id/btnMotorOff"
+                    style="?android:attr/buttonBarButtonStyle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textSize="12sp"
+                    android:text="马达 关" />
+
+                <Button
+                    android:id="@+id/btnStopMotor"
+                    style="?android:attr/buttonBarButtonStyle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textSize="12sp"
+                    android:text="停转" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/tvAck"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textColor="#FF9FB3C8"
+                android:textSize="11sp"
+                android:text="—" />
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

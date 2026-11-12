@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- 三条距离环 -->
+    <path
+        android:pathData="M54,54 m-33,0 a33,33 0 1,0 66,0 a33,33 0 1,0 -66,0"
+        android:strokeColor="#FF2E7D5B"
+        android:strokeWidth="1.6" />
+    <path
+        android:pathData="M54,54 m-22,0 a22,22 0 1,0 44,0 a22,22 0 1,0 -44,0"
+        android:strokeColor="#FF2E7D5B"
+        android:strokeWidth="1.6" />
+    <path
+        android:pathData="M54,54 m-11,0 a11,11 0 1,0 22,0 a11,11 0 1,0 -22,0"
+        android:strokeColor="#FF2E7D5B"
+        android:strokeWidth="1.6" />
+
+    <!-- 扫描扇区 -->
+    <path
+        android:pathData="M54,54 L70.5,25.4 L37.5,25.4 Z"
+        android:fillColor="#5535C6D6" />
+
+    <!-- 中心与目标点 -->
+    <path
+        android:pathData="M54,54 m-2.6,0 a2.6,2.6 0 1,0 5.2,0 a2.6,2.6 0 1,0 -5.2,0"
+        android:fillColor="#FFFFFFFF" />
+    <path
+        android:pathData="M72,38 m-2,0 a2,2 0 1,0 4,0 a2,2 0 1,0 -4,0"
+        android:fillColor="#FFFCFFA4" />
+    <path
+        android:pathData="M41,70 m-1.6,0 a1.6,1.6 0 1,0 3.2,0 a1.6,1.6 0 1,0 -3.2,0"
+        android:fillColor="#FFD44842" />
+</vector>

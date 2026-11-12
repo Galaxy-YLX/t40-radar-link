@@ -6,3 +6,9 @@
 *.conf text eol=lf
 *.py text eol=lf
 *.md text eol=lf
+
+# 二进制：别让 autocrlf 碰它们（APK / gradle wrapper / 图标 / 测试帧数据）
+*.apk binary
+*.jar binary
+*.png binary
+*.bin binary
