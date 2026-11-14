@@ -9,9 +9,13 @@ t40_bridge.py —— 板卡侧桥接程序
 协议见 protocol/PROTOCOL.md，默认监听 0.0.0.0:46000。
 
 用法:
-    python3 t40_bridge.py                        # 默认
+    python3 t40_bridge.py                        # 板卡默认（监听 0.0.0.0:46000）
     python3 t40_bridge.py --port 46000 --can can0 --wifi wlx00037f2044d2
     python3 t40_bridge.py --no-can --no-udp      # 只跑 TCP，便于联调上位机
+    python3 t40_bridge.py --bind 127.0.0.1 --name LOCAL   # 本机代替板卡
+
+本机模式由 setup/start_local.sh 拉起：不需要 XCZU3EG、不需要第二块网卡
+（t40_link AP）和 dnsmasq，本机上位机直接连 127.0.0.1:46000。
 
 注意：板上是 Python 3.6，不要用 3.8+ 语法。
 """
@@ -298,7 +302,9 @@ class Bridge(object):
         self.log("雷达 UDP 就绪: :%d" % self.args.udp_port)
         while True:
             try:
-                data, addr = s.recvfrom(4096)
+                # 0x00F0 单包可达几 KB~几十 KB（5000 点 × 12B），4096 会把
+                # 帧尾截掉，上位机只能解出一个残缺的点云。UDP 最大负载 65507。
+                data, addr = s.recvfrom(65535)
             except socket.timeout:
                 continue
             except Exception:
@@ -628,7 +634,8 @@ class Bridge(object):
         q = self.q
         # HELLO（此时发送线程还没起，独占 socket）
         hello = struct.pack("<H", 1) + bytes([len("1.0.0")]) + b"1.0.0"
-        hello += bytes([len("FZ3B")]) + b"FZ3B" + bytes([0x07])
+        name = self.args.name.encode("utf-8", "replace")[:255]
+        hello += bytes([len(name)]) + name + bytes([0x07])
         try:
             conn.sendall(encode_frame(T_HELLO, hello, 0, now_ns()))
         except Exception:
@@ -687,10 +694,10 @@ class Bridge(object):
     def tcp_server(self):
         srv = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         srv.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        srv.bind(("0.0.0.0", self.args.port))
+        srv.bind((self.args.bind, self.args.port))
         srv.listen(1)
-        self.log("TCP 监听 0.0.0.0:%d" % self.args.port)
-        print("listening on 0.0.0.0:%d" % self.args.port, flush=True)
+        self.log("TCP 监听 %s:%d" % (self.args.bind, self.args.port))
+        print("listening on %s:%d" % (self.args.bind, self.args.port), flush=True)
         while True:
             conn, addr = srv.accept()
             conn.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
@@ -717,8 +724,11 @@ class Bridge(object):
 
 
 def main():
-    ap = argparse.ArgumentParser(description="T40 雷达数据桥接（板卡侧）")
+    ap = argparse.ArgumentParser(description="T40 雷达数据桥接（板卡 / 本机）")
     ap.add_argument("--port", type=int, default=46000, help="TCP 监听端口")
+    ap.add_argument("--bind", default="0.0.0.0",
+                    help="TCP 监听地址（本机代替板卡时用 127.0.0.1）")
+    ap.add_argument("--name", default="FZ3B", help="HELLO 里的节点名")
     ap.add_argument("--can", default="can0")
     ap.add_argument("--wifi", default="wlx00037f2044d2", help="雷达 AP 网卡名")
     ap.add_argument("--udp-port", type=int, default=40204, help="雷达业务 UDP 端口")

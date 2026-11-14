@@ -29,6 +29,7 @@ host/duml_v2.py             DUML v2 / 1E61 感知包解析
 host/cloud_view_live.bat    Windows 双击启动点云显示
 android/                    安卓端：原生 Kotlin 重写的点云显示（含预编译 APK）
 setup/start_all.sh          板卡上电一键恢复整套链路（AP + CAN + 桥接 + 看门狗）
+setup/start_local.sh        本机代替板卡：PC 上起 AP/CAN/FC 门控 + TCP 46000 桥接
 setup/radar_bringup.sh      雷达侧后台看护（等网卡 → 起 AP → 等关联 → 起 radar_min）
 setup/radar_usb_watch.sh    雷达网卡掉线后自动重新枚举 USB
 setup/radar_watchdog.sh     雷达链路看门狗（收不到包 → 软恢复 → 重启板卡）
@@ -108,6 +109,36 @@ pip install -r host/requirements.txt
 python host/t40_gui.py --host 192.168.9.1 --auto      # 控制台
 python host/t40_cloud_view.py                          # 点云（默认走板卡转发）
 ```
+
+## 本机代替板卡（无 XCZU3EG）
+
+没有板卡时，PC 自己就是「板卡」：本机 ath6kl 网卡起 `radar_wifi` AP（192.168.8.1），
+SocketCAN `can0` 接 ESC，`host/radar_min.py` 负责 0x1E21 门控与电机 DUML 双向转发，
+`bridge/t40_bridge.py` 把雷达 UDP 40204 的 0x00F0 点云转成 T40R 帧从
+`127.0.0.1:46000` 发出。**协议帧格式不变**，上位机只是把地址从 `192.168.9.1`
+换成 `127.0.0.1`；第二块网卡、`t40_link` AP、dnsmasq、板端看门狗都不需要。
+
+```bash
+setup/start_local.sh start        # AP + CAN + FC 门控 + 桥接（脚本内按需 sudo）
+setup/start_local.sh status       # 进程 / TCP 端口 / AP / CAN / 日志尾部
+setup/start_local.sh stop         # 只停桥接和门控，不动 AP/CAN/hostapd
+
+../Radar_2d/run.sh local          # 一键：起本机链路 + 打开 2D 雷达（不带参数默认同此）
+../Radar_2d/run.sh local-stop
+
+python host/t40_cloud_view.py --src tcp://127.0.0.1:46000   # 原有点云上位机
+```
+
+注意：
+
+- 本机桥接占用 UDP 40204，2D 雷达必须走 `local` / `link` 模式，**不能**用 `--src udp`
+  （两个进程会抢同一个端口）；
+- 默认 `--bind 127.0.0.1` 只服务本机；`BIND=0.0.0.0 setup/start_local.sh start`
+  可让局域网里的手机/电脑也连（桥接同时仍然只接一个客户端）；
+- `SKIP_HW=1 setup/start_local.sh start` 跳过 AP/CAN 和 FC 门控、给桥接加 `--no-can`，
+  只用于没有雷达硬件时联调转发链路；
+- 2D 雷达的开机/关机走 CMD 0x40 → 本机 SocketCAN，不再需要额外启动
+  `radar_client/radar_min_client.py`。
 
 ## 点云实时显示
 
