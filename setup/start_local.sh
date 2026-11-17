@@ -73,20 +73,20 @@ prepare_env() {
         echo "[local] SKIP_HW=1：跳过 AP / CAN 配置与 FC 门控（仅联调转发）"
         return 0
     fi
-    if have_ap; then
-        echo "[local] radar_wifi AP 已就绪 (192.168.8.1)"
-    else
-        echo "[local] 未找到 192.168.8.1 -> 启动本机雷达 AP"
-        if ! sudo "$REPO_ROOT/setup/start_ap.sh"; then
-            echo "[local] 警告：AP 启动失败（驱动/网卡没插好？），链路仍会启动" >&2
-        fi
-    fi
     if have_can; then
         echo "[local] $CAN_IFACE 已 UP"
     else
         echo "[local] $CAN_IFACE 未 UP -> 配置 SocketCAN"
         if ! bash "$REPO_ROOT/setup/start_can.sh"; then
             echo "[local] 警告：CAN 配置失败，上位机电机命令会返回失败" >&2
+        fi
+    fi
+    if have_ap; then
+        echo "[local] radar_wifi AP 已就绪 (192.168.8.1)"
+    else
+        echo "[local] 未找到 192.168.8.1 -> 启动本机雷达 AP"
+        if ! sudo "$REPO_ROOT/setup/start_ap.sh"; then
+            echo "[local] 警告：AP 启动失败（驱动/网卡没插好？），链路仍会启动" >&2
         fi
     fi
 }
